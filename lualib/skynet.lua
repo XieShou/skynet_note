@@ -13,7 +13,9 @@ local tinsert = table.insert
 local tpack = table.pack
 local tunpack = table.unpack
 local traceback = debug.traceback
-
+--- server_snlua.c init_cb函数中替换
+--- init_profile声明
+--- luaB_coresume
 local cresume = coroutine.resume
 local running_thread = nil
 local init_thread = nil
@@ -22,6 +24,7 @@ local function coroutine_resume(co, ...)
 	running_thread = co
 	return cresume(co, ...)
 end
+
 local coroutine_yield = coroutine.yield
 local coroutine_create = coroutine.create
 
@@ -250,6 +253,7 @@ end
 local coroutine_pool = setmetatable({}, { __mode = "kv" })
 
 local function co_create(f)
+	-- 协程池
 	local co = tremove(coroutine_pool)
 	if co == nil then
 		co = coroutine_create(function(...)
@@ -275,17 +279,25 @@ local function co_create(f)
 					session_coroutine_address[co] = nil
 				end
 
+				-- 存池子，挂起
 				-- recycle co into pool
 				f = nil
 				coroutine_pool[#coroutine_pool+1] = co
 				-- recv new main function f
 				f = coroutine_yield "SUSPEND"
+
+				--- 关键：上面从resume又拿到新的func
+				--下方coroutine_yield()又将协程挂在下面这一行，不会实际运行f
+				--本函数目的是返回一个corotine嘛。进入后打个转又出来了。
+
+				--TODO：执行yield，等待下放resume传入新的f
 				f(coroutine_yield())
 			end
 		end)
 	else
 		-- pass the main function f to coroutine, and restore running thread
 		local running = running_thread
+		-- 将f安装进co，即上方TODO处
 		coroutine_resume(co, f)
 		running_thread = running
 	end

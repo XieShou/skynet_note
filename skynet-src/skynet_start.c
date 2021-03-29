@@ -274,7 +274,7 @@ skynet_start(struct skynet_config * config) {
 	skynet_timer_init();
 	skynet_socket_init();
 	skynet_profile_enable(config->profile);
-
+	//开log服务
 	struct skynet_context *ctx = skynet_context_new(config->logservice, config->logger);
 	if (ctx == NULL) {
 		fprintf(stderr, "Can't launch %s service\n", config->logservice);
@@ -282,6 +282,7 @@ skynet_start(struct skynet_config * config) {
 	}
 
 	skynet_handle_namehandle(skynet_context_handle(ctx), "logger");
+	//开引导流程
     printf("--Open bootstrap ->%s", config->bootstrap?config->bootstrap:"");
 	bootstrap(ctx, config->bootstrap);
 

@@ -116,7 +116,7 @@ static const char * load_config = "\
 
 int
 main(int argc, char *argv[]) {
-
+	//拿配置，初始化状态机Env等一堆操作
 	const char * config_file = NULL ;
 	if (argc > 1) {
 		config_file = argv[1];
@@ -153,7 +153,7 @@ main(int argc, char *argv[]) {
 		return 1;
 	}
 	_init_env(L);
-
+	//初始化配置
 	config.thread =  optint("thread",8);
 	config.module_path = optstring("cpath","./cservice/?.so");
 	config.harbor = optint("harbor", 1);
