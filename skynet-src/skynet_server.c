@@ -272,7 +272,7 @@ dispatch_message(struct skynet_context *ctx, struct skynet_message *msg) {
 	}
 	++ctx->message_count;
 	int reserve_msg;
-	//调用callback,处理消息
+	//调用对应context的_cb，最终会调用到lua层的skynet.dispatch_message
 	if (ctx->profile) {
 		ctx->cpu_start = skynet_thread_time();
 		reserve_msg = ctx->cb(ctx, ctx->cb_ud, type, msg->session, msg->source, msg->data, sz);

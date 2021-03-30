@@ -51,21 +51,22 @@ traceback (lua_State *L) {
 	}
 	return 1;
 }
-
+//skynet_server.c的dispatch_message函数调用
+//C层回调，调用真正的Lua层回调
 static int
 _cb(struct skynet_context * context, void * ud, int type, int session, uint32_t source, const void * msg, size_t sz) {
 	lua_State *L = ud;
 	int trace = 1;
 	int r;
 	int top = lua_gettop(L);
-	if (top == 0) {
+	if (top == 0) {//栈顶为空，压入traceback和 skynet.dispatch_message
 		lua_pushcfunction(L, traceback);
 		lua_rawgetp(L, LUA_REGISTRYINDEX, _cb);
 	} else {
-		assert(top == 2);
+		assert(top == 2);//定死两个返回值
 	}
-	lua_pushvalue(L,2);
-
+	lua_pushvalue(L,2);//再讲skynet.dispatch_message压栈
+	//prototype, msg, sz, session, source 5个参数
 	lua_pushinteger(L, type);
 	lua_pushlightuserdata(L, (void *)msg);
 	lua_pushinteger(L,sz);
@@ -104,12 +105,13 @@ forward_cb(struct skynet_context * context, void * ud, int type, int session, ui
 
 static int
 lcallback(lua_State *L) {
+	//闭包方式获得注册表中数据
 	struct skynet_context * context = lua_touserdata(L, lua_upvalueindex(1));
 	int forward = lua_toboolean(L, 2);
 	luaL_checktype(L,1,LUA_TFUNCTION);
-	lua_settop(L,1);
-	lua_rawsetp(L, LUA_REGISTRYINDEX, _cb);
-
+	lua_settop(L,1);//清理栈，保证只有skynet.dispatch_message
+	lua_rawsetp(L, LUA_REGISTRYINDEX, _cb);//在C层 _cb调用lua层注册的回调
+	//回调函数挂注册表，注册表[_cb] = skynet.dispatch_message
 	lua_rawgeti(L, LUA_REGISTRYINDEX, LUA_RIDX_MAINTHREAD);
 	lua_State *gL = lua_tothread(L,-1);
 
