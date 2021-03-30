@@ -69,6 +69,7 @@ end)
 
 --- 协程池
 local co_pool = {}
+---@class note.co_create
 local function co_create(f)
     local co = table.remove(co_pool)
     if co == nil then

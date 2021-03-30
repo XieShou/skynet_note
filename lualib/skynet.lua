@@ -252,7 +252,7 @@ end
 -- coroutine reuse
 
 local coroutine_pool = setmetatable({}, { __mode = "kv" })
-
+---@see note.co_create
 local function co_create(f)
 	-- 协程池
 	local co = tremove(coroutine_pool)
@@ -280,18 +280,12 @@ local function co_create(f)
 					session_coroutine_address[co] = nil
 				end
 
-				-- 存池子，挂起
 				-- recycle co into pool
 				f = nil
 				coroutine_pool[#coroutine_pool+1] = co
 				-- recv new main function f
 				f = coroutine_yield "SUSPEND"
 
-				--- 关键：上面从resume又拿到新的func
-				--下方coroutine_yield()又将协程挂在下面这一行，不会实际运行f
-				--本函数目的是返回一个corotine嘛。进入后打个转又出来了。
-
-				--TODO：执行yield，等待下放resume传入新的f
 				f(coroutine_yield())
 			end
 		end)
