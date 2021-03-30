@@ -16,6 +16,7 @@ local traceback = debug.traceback
 --- server_snlua.c init_cb函数中替换
 --- init_profile声明
 --- luaB_coresume
+--- 返回boolen, ...
 local cresume = coroutine.resume
 local running_thread = nil
 local init_thread = nil

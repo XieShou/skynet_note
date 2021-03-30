@@ -66,3 +66,33 @@ skynet.dispatch("lua", function(session, source, cmd, ...)
 end)
 ]]
 ---@alias c.dispatch_func fun(session:any, source:any, cmd:string, subcmd:string, ...):void
+
+--- 协程池
+local co_pool = {}
+local function co_create(f)
+    local co = table.remove(co_pool)
+    if co == nil then
+        co = coroutine.create(function(...)
+            f(...)
+            while true do
+                co_pool[#co_pool + 1] = co
+                --- state 1 使用完挂起状态的协程，等待拿到新的f
+                f = coroutine.yield("SUSPEND")
+                --- state 2 替换后将自己挂起等待重新唤醒，使用新的参数运行，再进while true循环
+                f(coroutine.yield())
+            end
+        end)
+    else
+        coroutine.resume(co, f)
+    end
+    return co
+end
+
+for i = 1, 10 do
+    local function prt(number)
+        print(i .. " " .. number)
+    end
+    local new_co = co_create(prt) --- -> 新协程 或者 state2
+    coroutine.resume(new_co, "do " .. i) --- 从state2调用，结束后又变state1
+    print("---------------")
+end

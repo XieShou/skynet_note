@@ -390,7 +390,7 @@ init_cb(struct snlua *l, struct skynet_context *ctx, const char * args, size_t s
 	luaL_requiref(L, "skynet.profile", init_profile, 0);
 
 	int profile_lib = lua_gettop(L);
-	// ½«È«¾ÖÓòÖĞµÄĞ­³Ìº¯Êı»»³ÉÁËinit_profileÖĞ×¢²áµÄresume/wrap
+	// å°†å…¨å±€åŸŸä¸­çš„åç¨‹å‡½æ•°æ¢æˆäº†init_profileä¸­æ³¨å†Œçš„resume/wrap
 	// replace coroutine.resume / coroutine.wrap
 	lua_getglobal(L, "coroutine");
 	lua_getfield(L, profile_lib, "resume");
@@ -401,7 +401,7 @@ init_cb(struct snlua *l, struct skynet_context *ctx, const char * args, size_t s
 	lua_settop(L, profile_lib-1);
 
 	lua_pushlightuserdata(L, ctx);
-	//skynet_context¹Ò×¢²á±í
+	//skynet_contextæŒ‚æ³¨å†Œè¡¨
 	lua_setfield(L, LUA_REGISTRYINDEX, "skynet_context");
 	luaL_requiref(L, "skynet.codecache", codecache , 0);
 	lua_pop(L,1);
@@ -420,23 +420,23 @@ init_cb(struct snlua *l, struct skynet_context *ctx, const char * args, size_t s
 	const char *preload = skynet_command(ctx, "GETENV", "preload");
 	lua_pushstring(L, preload);
 	lua_setglobal(L, "LUA_PRELOAD");
-	//ÉèÖÃ´íÎó»Øµ÷£¬¼ì²éluaÕ»ÎªÏÂÃæµÄloader×ö×¼±¸
+	//è®¾ç½®é”™è¯¯å›è°ƒï¼Œæ£€æŸ¥luaæ ˆä¸ºä¸‹é¢çš„loaderåšå‡†å¤‡
 	lua_pushcfunction(L, traceback);
 	assert(lua_gettop(L) == 1);
-	// ¿ÉÒÔ¿´µ½Õë¶Ô¸÷ÖÖÅäÖÃÏî¶¼ÊÇÓĞÄ¬ÈÏÖµµÄ
+	// å¯ä»¥çœ‹åˆ°é’ˆå¯¹å„ç§é…ç½®é¡¹éƒ½æ˜¯æœ‰é»˜è®¤å€¼çš„
 	const char * loader = optstring(ctx, "lualoader", "./lualib/loader.lua");
-	//luaL_dofile¼ÓÔØ²¢ÇÒÔËĞĞ
-	//luaL_loadfileÖ»¼ÓÔØ²»ÔËĞĞ
+	//luaL_dofileåŠ è½½å¹¶ä¸”è¿è¡Œ
+	//luaL_loadfileåªåŠ è½½ä¸è¿è¡Œ
 	int r = luaL_loadfile(L,loader);
 	if (r != LUA_OK) {
 		skynet_error(ctx, "Can't load %s : %s", loader, lua_tostring(L, -1));
 		report_launcher_error(ctx);
 		return 1;
 	}
-	lua_pushlstring(L, args, sz);//push²ÎÊı£¬¼ÓÔØµÄlua·şÎñÃû³Æ£¬ÀıÈçbootstrap
-	//ÄÃÉÏÃæÕû¸öÎÄ¼şµ÷ÓÃpcall(loader(args))
+	lua_pushlstring(L, args, sz);//pushå‚æ•°ï¼ŒåŠ è½½çš„luaæœåŠ¡åç§°ï¼Œä¾‹å¦‚bootstrap
+	//æ‹¿ä¸Šé¢æ•´ä¸ªæ–‡ä»¶è°ƒç”¨pcall(loader(args))
 	//int lua_pcall (lua_State *L, int nargs, int nresults, int msgh);
-	//²ÎÊı¸öÊı£¬·µ»ØÖµ¸öÊı£¬´íÎó´¦Àíº¯ÊıÔÚÕ»ÖĞµÄË÷Òı£¨0´ú±íÎŞ£©
+	//å‚æ•°ä¸ªæ•°ï¼Œè¿”å›å€¼ä¸ªæ•°ï¼Œé”™è¯¯å¤„ç†å‡½æ•°åœ¨æ ˆä¸­çš„ç´¢å¼•ï¼ˆ0ä»£è¡¨æ— ï¼‰
 	r = lua_pcall(L,1,0,1);
 	if (r != LUA_OK) {
 		skynet_error(ctx, "lua loader error : %s", lua_tostring(L, -1));
@@ -462,8 +462,8 @@ static int
 launch_cb(struct skynet_context * context, void *ud, int type, int session, uint32_t source , const void * msg, size_t sz) {
 	assert(type == 0 && session == 0);
 	struct snlua *l = ud;
-	skynet_callback(context, NULL, NULL);//ÏÈ¹Øµô×Ô¼ºµÄcallback£¬ÎªÁËÔÚluaÖĞ°²×°cb
-	int err = init_cb(l, context, msg, sz);//ÔËĞĞ
+	skynet_callback(context, NULL, NULL);//å…ˆå…³æ‰è‡ªå·±çš„callbackï¼Œä¸ºäº†åœ¨luaä¸­å®‰è£…cb
+	int err = init_cb(l, context, msg, sz);//è¿è¡Œ
 	if (err) {
 		skynet_command(context, "EXIT", NULL);
 	}
@@ -476,13 +476,13 @@ snlua_init(struct snlua *l, struct skynet_context *ctx, const char * args) {
 	int sz = strlen(args);
 	char * tmp = skynet_malloc(sz);
 	memcpy(tmp, args, sz);
-	skynet_callback(ctx, l , launch_cb);//°²×°cb
+	skynet_callback(ctx, l , launch_cb);//å®‰è£…cb
 	const char * self = skynet_command(ctx, "REG", NULL);
 	uint32_t handle_id = strtoul(self+1, NULL, 16);
 	// it must be first message
-	// ¹Ø¼üÕâÒ»²ãÄ¿Ç°»¹²»Çå³şÓĞÃ»ÓĞ×ßLua²ã£¬Èç¹ûÃ»ÓĞµÄ»°¾ÍÏàµ±ÓÚ²âÊÔÏÂÍ¨Ñ¶È»ºóµ÷ÓÃÉÏÃæ°²×°µÄcb
-	// µÚÒ»ÌõÏûÏ¢½«args²ÎÊıÖĞµÄÄÚÈİ·¢ËÍ¸øÏûÏ¢×Ô¼º
-	// ÓÉÉÏÃæ×¢²áµÄcb»Øµ÷
+	// å…³é”®è¿™ä¸€å±‚ç›®å‰è¿˜ä¸æ¸…æ¥šæœ‰æ²¡æœ‰èµ°Luaå±‚ï¼Œå¦‚æœæ²¡æœ‰çš„è¯å°±ç›¸å½“äºæµ‹è¯•ä¸‹é€šè®¯ç„¶åè°ƒç”¨ä¸Šé¢å®‰è£…çš„cb
+	// ç¬¬ä¸€æ¡æ¶ˆæ¯å°†argså‚æ•°ä¸­çš„å†…å®¹å‘é€ç»™æ¶ˆæ¯è‡ªå·±
+	// ç”±ä¸Šé¢æ³¨å†Œçš„cbå›è°ƒ
 	skynet_send(ctx, 0, handle_id, PTYPE_TAG_DONTCOPY,0, tmp, sz);
 	return 0;
 }
