@@ -144,11 +144,11 @@ dispatch_list(struct timer_node *current) {
 		struct timer_event * event = (struct timer_event *)(current+1);
 		struct skynet_message message;
 		message.source = 0;
-		message.session = event->session;
+		message.session = event->session;//定时器中的session被放入消息中
 		message.data = NULL;
-		message.sz = (size_t)PTYPE_RESPONSE << MESSAGE_TYPE_SHIFT;
+		message.sz = (size_t)PTYPE_RESPONSE << MESSAGE_TYPE_SHIFT;//PTYPE_RESPONSE
 
-		skynet_context_push(event->handle, &message);
+		skynet_context_push(event->handle, &message);//发出
 		
 		struct timer_node * temp = current;
 		current=current->next;

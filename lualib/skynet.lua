@@ -298,7 +298,7 @@ local function co_create(f)
 	end
 	return co
 end
-
+--- 找待运行的协程来运行
 local function dispatch_wakeup()
 	while true do
 		local token = tremove(wakeup_queue,1)
@@ -317,9 +317,10 @@ local function dispatch_wakeup()
 	end
 	return dispatch_error_queue()
 end
-
+--- 对应co_create，作为底层回调时，lua层resume协程调度的标准接口
 -- suspend is local function
 function suspend(co, result, command)
+	--- 协程出错
 	if not result then
 		local session = session_coroutine_id[co]
 		if session then -- coroutine may fork by others (session is nil)
@@ -390,6 +391,7 @@ function skynet.timeout(ti, func)
 	local co = co_create_for_timeout(func, ti)
 	assert(session_id_coroutine[session] == nil)
 	--- session对应协程
+	--- raw_dispatch_message中会根据session取回该协程，然后调用
 	session_id_coroutine[session] = co
 	return co	-- for debug
 end
@@ -831,6 +833,7 @@ local function raw_dispatch_message(prototype, msg, sz, session, source)
 		else
 			local tag = session_coroutine_tracetag[co]
 			if tag then c.trace(tag, "resume") end
+			--- 取到然后resume
 			session_id_coroutine[session] = nil
 			suspend(co, coroutine_resume(co, true, msg, sz, session))
 		end
@@ -889,6 +892,7 @@ end
 function skynet.dispatch_message(...)
 	local succ, err = pcall(raw_dispatch_message,...)
 	while true do
+		--- 处理fork_queue
 		if fork_queue.h > fork_queue.t then
 			-- queue is empty
 			fork_queue.h = 1

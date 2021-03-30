@@ -272,8 +272,9 @@ dispatch_message(struct skynet_context *ctx, struct skynet_message *msg) {
 	}
 	++ctx->message_count;
 	int reserve_msg;
-	//调用对应context的_cb，最终会调用到lua层的skynet.dispatch_message
-	if (ctx->profile) {
+	//璋冪敤瀵瑰簲context鐨刜cb锛屾渶缁堜細璋冪敤鍒發ua灞傜殑skynet.dispatch_message
+	if (ctx->profile) {路
+
 		ctx->cpu_start = skynet_thread_time();
 		reserve_msg = ctx->cb(ctx, ctx->cb_ud, type, msg->session, msg->source, msg->data, sz);
 		uint64_t cost_time = skynet_thread_time() - ctx->cpu_start;
@@ -402,8 +403,8 @@ static const char *
 cmd_timeout(struct skynet_context * context, const char * param) {
 	char * session_ptr = NULL;
 	int ti = strtol(param, &session_ptr, 10);
-	int session = skynet_context_newsession(context);
-	skynet_timeout(context->handle, ti, session);
+	int session = skynet_context_newsession(context);//鍒涘缓session
+	skynet_timeout(context->handle, ti, session);//瀹夎timer
 	sprintf(context->result, "%d", session);
 	return context->result;
 }
