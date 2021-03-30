@@ -1,4 +1,4 @@
-#define LUA_LIB
+﻿#define LUA_LIB
 
 #include "skynet.h"
 #include "lua-seri.h"
@@ -191,7 +191,7 @@ lintcommand(lua_State *L) {
 
 	result = skynet_command(context, cmd, parm);
 	if (result) {
-		char *endptr = NULL; 
+		char *endptr = NULL;
 		lua_Integer r = strtoll(result, &endptr, 0);
 		if (endptr == NULL || *endptr != '\0') {
 			// may be real number
@@ -454,13 +454,13 @@ ltrace(lua_State *L) {
 			skynet_error(context, "<TRACE %s> %" PRId64 " %s : %s:%d", tag, get_time(), user, si[0].source, si[0].line);
 			break;
 		case 2:
-			skynet_error(context, "<TRACE %s> %" PRId64 " %s : %s:%d %s:%d", tag, get_time(), user, 
+			skynet_error(context, "<TRACE %s> %" PRId64 " %s : %s:%d %s:%d", tag, get_time(), user,
 				si[0].source, si[0].line,
 				si[1].source, si[1].line
 				);
 			break;
 		case 3:
-			skynet_error(context, "<TRACE %s> %" PRId64 " %s : %s:%d %s:%d %s:%d", tag, get_time(), user, 
+			skynet_error(context, "<TRACE %s> %" PRId64 " %s : %s:%d %s:%d %s:%d", tag, get_time(), user,
 				si[0].source, si[0].line,
 				si[1].source, si[1].line,
 				si[2].source, si[2].line
@@ -475,7 +475,7 @@ ltrace(lua_State *L) {
 	skynet_error(context, "<TRACE %s> %" PRId64 " %s", tag, get_time(), user);
 	return 0;
 }
-
+//lua层的require 'skynet.core'
 LUAMOD_API int
 luaopen_skynet_core(lua_State *L) {
 	luaL_checkversion(L);
